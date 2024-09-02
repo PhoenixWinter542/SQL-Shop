@@ -62,6 +62,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ShopDataSet.xsd</DependentUpon>
     </Compile>
+    <Compile Include="StatusServ.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

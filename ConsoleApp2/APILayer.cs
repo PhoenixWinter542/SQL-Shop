@@ -86,12 +86,12 @@ namespace Shop
 		//Order CRUD
 
 		//Adds order to order table, Adds order items to itemStatus table
-		public bool AddOrder(string login, bool paid, DateTime timeStampRecived, float total)
+		public bool AddOrder(string login, bool paid, DateTime timeStampRecived, float total, List<string> items)
 		{
 			switch (database)
 			{
 				case 0: //SQL Server
-					return OrderServ.AddOrder(login, paid, timeStampRecived, total);
+					return OrderServ.AddOrder(login, paid, timeStampRecived, total, items);
 
 				default:
 					return false;
@@ -213,6 +213,63 @@ namespace Shop
 			{
 				case 0: //SQL Server
 					return ProfileServ.DeleteProfile();
+
+				default:
+					return false;
+			}
+		}
+
+
+		//itemStatus CRUD
+
+		//Adds given items to itemStatus as part of given order with given timestamp
+		//Assumes deliveryStatus is "Hasn't started"
+		//API call not used as part of placing orders, included to allow managers to add items to existing orders
+		public bool AddItem(List<string> items, int orderId, DateTime timeStampRecieved)
+		{
+			switch (database)
+			{
+				case 0: //SQL Server
+					return StatusServ.AddItem(items, orderId, timeStampRecieved);
+
+				default:
+					return false;
+			}
+		}
+
+		//Returns all items that are part of the given order
+		public DataSet GetStatus(int orderId)
+		{
+			switch (database)
+			{
+				case 0: //SQL Server
+					return StatusServ.GetStatus(orderId);
+
+				default:
+					return null;
+			}
+		}
+
+		//Sets the delivery status for all items with given orderId
+		public bool SetStatus(int orderId, string status)
+		{
+			switch (database)
+			{
+				case 0: //SQL Server
+					return StatusServ.SetStatus(orderId, status);
+
+				default:
+					return false;
+			}
+		}
+
+		//Allows managers to remove items from shipments
+		public bool RemoveItem(int orderId, string itemname)
+		{
+			switch (database)
+			{
+				case 0: //SQL Server
+					return StatusServ.RemoveItem(orderId, itemname);
 
 				default:
 					return false;

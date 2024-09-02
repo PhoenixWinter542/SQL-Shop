@@ -9,7 +9,8 @@ namespace Shop
 		//Order CRUD
 
 		//Adds order to order table, Adds order items to itemStatus table
-		public static bool AddOrder(string login, bool paid, DateTime timeStampRecived, float total)
+		//orderId is auto populated as an Identity column
+		public static bool AddOrder(string login, bool paid, DateTime timeStampRecived, float total, List<string> items)
 		{
 			return true;
 		}
