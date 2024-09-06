@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="APILayer.cs" />
+    <Compile Include="SQLAdapter.cs" />
     <Compile Include="ItemServ.cs" />
     <Compile Include="OrderServ.cs" />
     <Compile Include="ProfileServ.cs" />
@@ -63,6 +64,7 @@
       <DependentUpon>ShopDataSet.xsd</DependentUpon>
     </Compile>
     <Compile Include="StatusServ.cs" />
+    <Compile Include="TestFramework.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
