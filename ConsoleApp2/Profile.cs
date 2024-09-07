@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Shop
 {
-	internal static class ProfileServ
+	internal static class Profile
 	{
 		/*
 		 * 0 - login failed

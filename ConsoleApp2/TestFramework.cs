@@ -9,8 +9,8 @@ namespace Shop
 	public class TestFramework
 	{
 		//variables
-		List<List<Func<bool>>> testSets;
-		List<string> setNames;
+		List<List<Func<bool>>> testSets = new List<List<Func<bool>>>();
+		List<string> setNames = new List<string>();
 		public bool showAll = true;
 		public bool stopOnFail = false;
 		public string indent = "\t";
@@ -56,7 +56,7 @@ namespace Shop
 			if (showAll)
 			{
 				Console.ForegroundColor = ConsoleColor.Red;
-				Console.Write("\n" + indent + indent + indent + "FAILED");
+				Console.Write(indent + "FAILED");
 				Console.ResetColor();
 			}
 		}
@@ -68,7 +68,7 @@ namespace Shop
 			foreach (Func<bool> test in testSet)
 			{
 				if (showAll)
-					Console.Write(indent + indent + "Running " + test.Method.Name);
+					Console.Write("\n" + indent + indent + test.Method.Name);
 				if (true == test())
 				{
 					TestPass();
@@ -80,29 +80,47 @@ namespace Shop
 					if (stopOnFail)
 						return false;
 				}
-				if (showAll)
-					Console.WriteLine();
 			}
 			return allPassed;
 		}
 
-		public void runTests()
+		public void RunTests()
 		{
 			bool allPassed = true;
-			Console.WriteLine("Starting Tests");
+			Console.Write("Starting Tests");
+			if (false == showAll)
+				Console.Write("\n");
 			for (int i = 0; i < testSets.Count; i++)
 			{
-				Console.WriteLine("Running " + setNames[i]);
-				if (true == RunSet(testSets[i]))
+				if (showAll)
 				{
+					Console.Write("\n\n" + indent);
+					Console.BackgroundColor = ConsoleColor.DarkGray;
+					Console.ForegroundColor = ConsoleColor.White;
+					Console.Write("Running " + setNames[i]);
+					Console.ResetColor();
+				}
+
+				bool setPassed = RunSet(testSets[i]);
+				Console.Write("\n" + indent);
+				if (true == setPassed)
+				{
+					Console.ForegroundColor = ConsoleColor.White;
+					Console.BackgroundColor = ConsoleColor.DarkGreen;
+					Console.Write(setNames[i]);
+					Console.ResetColor();
 					Console.ForegroundColor = ConsoleColor.Green;
-					Console.WriteLine(indent + "PASSED");
+					Console.Write(" PASSED");
 					Console.ResetColor();
 				}
 				else
 				{
+					Console.ForegroundColor = ConsoleColor.White;
+					Console.BackgroundColor = ConsoleColor.DarkRed;
+					Console.Write(setNames[i]);
+					Console.ResetColor();
 					Console.ForegroundColor = ConsoleColor.Red;
-					Console.WriteLine("\n" + indent + "FAILED");
+					Console.Write(" FAILED");
 					Console.ResetColor();
 					allPassed = false;
 					if(stopOnFail)
@@ -110,6 +128,7 @@ namespace Shop
 				}
 			}
 
+			Console.Write("\n\n");
 			if (allPassed)
 			{
 				Console.ForegroundColor = ConsoleColor.Green;

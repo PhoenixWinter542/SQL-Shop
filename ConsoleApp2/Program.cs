@@ -11,7 +11,7 @@ namespace Shop
 	{
 		static void Main(string[] args)
 		{
-
+			Tests.Run();
 		}
 	}
 }

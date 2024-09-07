@@ -4,18 +4,22 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Data.SqlClient;
 
 namespace Shop
 {
 	public class SQLAdapter
 	{
+		public bool testing = false;
+
+		private string connectionString = "server=DESKTOP-SV6S892;trusted_connection=Yes";
 		private enum SQLType
 		{
 			SQLSERVER
 		};
 		private SQLType type;
 
-		SQLAdapter(string typeName)
+		public SQLAdapter(string typeName)
 		{
 			switch (typeName)
 			{
@@ -28,7 +32,7 @@ namespace Shop
 			}
 		}
 
-		public DataSet query(List<string> selectColNames, List<string> fromTableName, List<string> whereConds, string groupBy, string having, string orderBy)
+		public DataTable query(List<string> selectColNames, List<string> fromTableName, List<string> whereConds, string groupBy, string having, string orderBy)
 		{
 			switch (type)
 			{
@@ -47,7 +51,7 @@ namespace Shop
 		 * having	- null skips field
 		 * orderBy	- null skips field
 		 */
-		public static DataSet SQLSERVER(List<string> selectColNames, List<string> fromTableName, List<string> whereConds, string groupBy, string having, string orderBy)
+		public  DataTable SQLSERVER(List<string> selectColNames, List<string> fromTableName, List<string> whereConds, string groupBy, string having, string orderBy)
 		{
 			//SELECT
 			string query = "SELECT";
@@ -58,9 +62,9 @@ namespace Shop
 				{
 					query += " " + colName;
 				}
-			query += "\n";
 
 			//FROM
+			query += "\n";
 			if (fromTableName == null)
 				return null;
 			query += "FROM";
@@ -68,17 +72,16 @@ namespace Shop
 			{
 				query += " " + tableName;
 			}
-			query += "\n";
 
 			//WHERE
 			if(whereConds != null)
 			{
+				query += "\n";
 				query += "WHERE";
 				foreach (string conditions in whereConds)
 				{
 					query += " " + conditions;
 				}
-				query += "\n";
 			}
 
 			//GROUP BY
@@ -86,24 +89,39 @@ namespace Shop
 				return null;
 			if (groupBy != null)
 			{
-				query += "GROUP BY " + groupBy + "\n";
+				query += "\nGROUP BY " + groupBy;
 			}
 
 			//HAVING
 			if(having != null)
 			{
-				query += "HAVING " + having + "\n";
+				query += "\nHAVING " + having;
 			}
 
 			//ORDER BY
 			if(orderBy != null)
 			{
-				query += "ORDER BY" + orderBy + ";";
+				query += "\nORDER BY" + orderBy;
 			}
+			query += ";";
 
-			Console.WriteLine(query);
+			//Console.WriteLine("\n" + query);
 
-			return null;
+			SqlConnection conn = new SqlConnection(connectionString);
+			conn.Open();
+			SqlTransaction transaction = conn.BeginTransaction();
+			SqlDataAdapter da = new SqlDataAdapter(query, conn);
+			da.SelectCommand.Transaction = transaction;
+			DataSet ds = new DataSet();
+
+			da.Fill(ds);
+
+			if (true == testing)
+				transaction.Rollback();
+			else
+				transaction.Commit();
+			conn.Close();
+			return ds.Tables[0];
 		}
 	}
 }

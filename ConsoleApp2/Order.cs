@@ -4,7 +4,7 @@ using System.Data;
 
 namespace Shop
 {
-	internal static class OrderServ
+	internal static class Order
 	{
 		//Order CRUD
 

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Shop
 {
-	internal static class StatusServ
+	internal static class Status
 	{
 		//itemStatus CRUD
 
