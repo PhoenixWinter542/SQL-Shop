@@ -8,38 +8,97 @@ using System.Data.SqlClient;
 
 namespace Shop
 {
-	public class SQLAdapter
+	public class SQLAdapter : IDisposable
 	{
-		public bool testing = false;
+		private readonly bool testing = false;
 
 		private string connectionString = "server=DESKTOP-SV6S892;trusted_connection=Yes";
 		private enum SQLType
 		{
-			SQLSERVER
+			TRANSACT
 		};
-		private SQLType type;
+		private readonly SQLType type;
+		private SqlConnection conn;
+		private SqlTransaction transaction;
 
 		public SQLAdapter(string typeName)
 		{
 			switch (typeName)
 			{
-				case "SQLSERVER":
-					type = SQLType.SQLSERVER;
+				case "TRANSACT":
+					type = SQLType.TRANSACT;
 					break;
 				default:
-					type = SQLType.SQLSERVER;
+					type = SQLType.TRANSACT;
 					break;
 			}
+			conn = new SqlConnection(connectionString);
+			conn.Open();
 		}
 
-		public DataTable query(List<string> selectColNames, List<string> fromTableName, List<string> whereConds, string groupBy, string having, string orderBy)
+		public SQLAdapter(string typeName, bool testing) : this(typeName)
+		{
+			this.testing = testing;
+			transaction = conn.BeginTransaction();
+		}
+
+		public void Dispose()
+		{
+			if(testing)
+				transaction.Rollback();
+			else
+				transaction.Commit();
+			conn.Close();
+		}
+
+		public DataTable Read(List<string> selectColNames, List<string> fromTableName, List<string> whereConds, string groupBy, string having, string orderBy)
 		{
 			switch (type)
 			{
-				case SQLType.SQLSERVER:
-					return SQLSERVER(selectColNames, fromTableName, whereConds, groupBy, having, orderBy);
+				case SQLType.TRANSACT:
+					return TransactRead(selectColNames, fromTableName, whereConds, groupBy, having, orderBy);
 				default:
 					return null;
+			}
+		}
+
+		public void Commit()
+		{
+			transaction.Commit();
+			transaction = conn.BeginTransaction();
+		}
+
+		//Returns number of rows effected
+		public int Create(string table, List<(string, string)> data)
+		{
+			switch (type)
+			{
+				case SQLType.TRANSACT:
+					return TransactCreate(table, data);
+				default:
+					return -1;
+			}
+		}
+
+		public int Update(string table, List<string> set, List<string> where)
+		{
+			switch (type)
+			{
+				case SQLType.TRANSACT:
+					return TransactUpdate(table, set, where);
+				default:
+					return -1;
+			}
+		}
+
+		public int Delete(string table, List<string> where)
+		{
+			switch (type)
+			{
+				case SQLType.TRANSACT:
+					return TransactDelete(table, where);
+				default:
+					return -1;
 			}
 		}
 
@@ -51,7 +110,7 @@ namespace Shop
 		 * having	- null skips field
 		 * orderBy	- null skips field
 		 */
-		public  DataTable SQLSERVER(List<string> selectColNames, List<string> fromTableName, List<string> whereConds, string groupBy, string having, string orderBy)
+		private DataTable TransactRead(List<string> selectColNames, List<string> fromTableName, List<string> whereConds, string groupBy, string having, string orderBy)
 		{
 			//SELECT
 			string query = "SELECT";
@@ -105,23 +164,125 @@ namespace Shop
 			}
 			query += ";";
 
+			try
+			{
+				SqlDataAdapter da = new SqlDataAdapter(query, conn);
+				da.SelectCommand.Transaction = transaction;
+				DataSet ds = new DataSet();
+
+				da.Fill(ds);
+
+				return ds.Tables[0];
+			}
+			catch
+			{
+				return null;
+			}
+		}
+
+		private int TransactCreate(string table, List<(string column, string value)> data)
+		{
+			string query = "INSERT " + table + " (";
+
+			if (null == data)
+				return -1;
+
+			query += data[0].column;
+
+			for(int i = 1; i < data.Count; i++)
+			{
+				query += ", " + data[i].column;
+			}
+
+			query += ")\nVALUES (" + data[0].value;
+
+			for(int i = 1; i < data.Count; i++)
+			{
+				query += ", " + data[i].value;
+			}
+
+			query += ");";
+
 			//Console.WriteLine("\n" + query);
 
-			SqlConnection conn = new SqlConnection(connectionString);
-			conn.Open();
-			SqlTransaction transaction = conn.BeginTransaction();
-			SqlDataAdapter da = new SqlDataAdapter(query, conn);
-			da.SelectCommand.Transaction = transaction;
-			DataSet ds = new DataSet();
+			try
+			{
+				SqlCommand cmd = new SqlCommand(query, conn);
+				cmd.Transaction = transaction;
 
-			da.Fill(ds);
+				return cmd.ExecuteNonQuery();
+			}
+			catch
+			{
+				return -1;
+			}
+		}
 
-			if (true == testing)
-				transaction.Rollback();
-			else
-				transaction.Commit();
-			conn.Close();
-			return ds.Tables[0];
+		private int TransactUpdate(string table, List<string> set, List<string> where)
+		{
+			string query = "Update " + table + "\n";
+
+			if (null == set)
+				return -1;
+
+			query += "SET " + set[0];
+			for(int i = 1; i < set.Count; i++)
+			{
+				query += ", " + set[i];
+			}
+
+			if (null != where)
+			{
+				query += "\n";
+				query += "WHERE";
+				foreach (string conditions in where)
+				{
+					query += " " + conditions;
+				}
+			}
+			query += ";";
+
+
+
+			try
+			{
+				SqlCommand cmd = new SqlCommand(query, conn);
+				cmd.Transaction = transaction;
+
+				return cmd.ExecuteNonQuery();
+			}
+			catch
+			{
+				return -1;
+			}
+		}
+
+		private int TransactDelete(string table, List<string> where)
+		{
+			string query = "DELETE " + table;
+
+			if (null != where)
+			{
+				query += "\n";
+				query += "WHERE";
+				foreach (string conditions in where)
+				{
+					query += " " + conditions;
+				}
+			}
+			query += ";";
+
+			try
+			{
+				SqlCommand cmd = new SqlCommand(query, conn);
+				cmd.Transaction = transaction;
+
+				return cmd.ExecuteNonQuery();
+			}
+			catch
+			{
+				return -1;
+			}
 		}
 	}
 }
