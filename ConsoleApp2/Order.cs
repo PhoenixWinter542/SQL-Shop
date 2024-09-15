@@ -4,39 +4,42 @@ using System.Data;
 
 namespace Shop
 {
-	internal static class Order
+	internal class Order
 	{
-		//Order CRUD
+		SQLAdapter adapter;
+
+		public Order(SQLAdapter adapter)
+		{
+			this.adapter = adapter;
+		}
 
 		//Adds order to order table, Adds order items to itemStatus table
 		//orderId is auto populated as an Identity column
-		public static bool AddOrder(string login, bool paid, DateTime timeStampRecived, float total, List<string> items)
+		public bool AddOrder(string login, bool paid, DateTime timeStampRecived, float total, List<string> items)
 		{
-			return true;
+			return false;
 		}
 
-		/*
-		 * The list of bools chooses which fields to include in the search
-		 *  list order
-		 *	0 - orderId
-		 *	1 - login
-		 *	2 - paid
-		 *	3 - total
-		 */
-		public static DataSet GetOrders(List<bool> colsToGet, int orderId, string login, bool paid, float total)
+		//Accessors
+		public DataTable GetOrder(int orderId)
 		{
 			return null;
 		}
 
-		public static bool PayOrder(int orderId)
+		public DataTable GetPaidOrders()
 		{
-			return true;
+			return null;
 		}
 
-		public static bool CancelOrder(int orderId)
+		public DataTable GetUnpaidOrders()
 		{
-			return true;
+			return null;
 		}
 
+		//Setters
+		public bool SetOrderPaid(int orderId)
+		{
+			return false;
+		}
 	}
 }

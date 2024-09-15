@@ -13,7 +13,7 @@ namespace Shop
 			TestFramework tests = new TestFramework();
 
 			SQLAdapterTests.AddTests(ref tests);
-			//StatusTests.AddTests(ref tests);
+			StatusTests.AddTests(ref tests);
 			//ItemTests.AddTests(ref tests);
 			//ProfileTests.AddTests(ref tests);
 			//OrderTests.AddTests(ref tests);

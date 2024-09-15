@@ -7,13 +7,18 @@ using System.Threading.Tasks;
 
 namespace Shop
 {
-	internal static class Item
+	internal class Item
 	{
-		//Item CRUD
+		SQLAdapter adapter;
 
-		public static bool AddItem()
+		public Item(SQLAdapter adapter)
 		{
-			return true;
+			this.adapter = adapter;
+		}
+
+		public bool AddItem(string itemname, string type, float price, string description, string imageurl)
+		{
+			return false;
 		}
 
 		/*
@@ -22,22 +27,20 @@ namespace Shop
 		 *	0 - itemname
 		 *	1 - type
 		 *	2 - price
-		 *	3 - description
-		 *	4 - imageurl
 		 */
-		public static DataSet GetItems(List<bool> colsToGet, string itemname, string type, float price, string description, string imageurl)
+		public DataTable GetItems(List<bool> colsToGet, string itemname, string type, float price)
 		{
 			return null;
 		}
 
-		public static bool UpdateItem()
+		public bool UpdateItem(string itemname, string type, float price, string description, string imageurl)
 		{
-			return true;
+			return false;
 		}
 
-		public static bool DeleteItem()
+		public bool DeleteItem(string itemname)
 		{
-			return true;
+			return false;
 		}
 	}
 }
